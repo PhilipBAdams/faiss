@@ -46,6 +46,8 @@ struct VisitedTable;
 struct DistanceComputer; // from AuxIndexStructures
 struct HNSWStats;
 
+enum LevelSelectionMethod {Random, PriorSum, PriorMax};
+
 struct HNSW {
   /// internal storage of vectors (32 bits: this is expensive)
   typedef int storage_idx_t;
@@ -97,6 +99,9 @@ struct HNSW {
     bool operator < (const NodeDistFarther &obj1) const { return d > obj1.d; }
   };
 
+  /// Used for prior-adjusted calculations
+  LevelSelectionMethod lselect;
+  std::vector<double> priors;
 
   /// assignment probability to each layer (sum=1)
   std::vector<double> assign_probas;
@@ -164,7 +169,7 @@ struct HNSW {
   explicit HNSW(int M = 32);
 
   /// pick a random level for a new point
-  int random_level();
+  int random_level(size_t n);
 
   /// add n random levels to table (for debugging...)
   void fill_with_random_links(size_t n);

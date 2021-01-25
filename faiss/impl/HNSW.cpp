@@ -10,6 +10,7 @@
 #include <faiss/impl/HNSW.h>
 
 #include <string>
+#include <iostream>
 
 #include <faiss/impl/AuxIndexStructures.h>
 
@@ -58,12 +59,21 @@ HNSW::HNSW(int M) : rng(12345) {
   efConstruction = 40;
   upper_beam = 1;
   offsets.push_back(0);
+  lselect = LevelSelectionMethod::Random;
 }
 
 
-int HNSW::random_level()
+int HNSW::random_level(size_t n)
 {
   double f = rng.rand_float();
+  if (lselect == LevelSelectionMethod::PriorMax) {
+    f = std::max(f, priors[n]);
+  } else if (lselect == LevelSelectionMethod::PriorSum) {
+    if (n < 10) {
+      std::cout << "PriorSum" << std::endl;
+    }
+    f = f + priors[n];
+  }
   // could be a bit faster with bissection
   for (int level = 0; level < assign_probas.size(); level++) {
     if (f < assign_probas[level]) {
@@ -212,7 +222,7 @@ int HNSW::prepare_level_tab(size_t n, bool preset_levels)
   } else {
     FAISS_ASSERT (n0 == levels.size());
     for (int i = 0; i < n; i++) {
-      int pt_level = random_level();
+      int pt_level = random_level(i);
       levels.push_back(pt_level + 1);
     }
   }

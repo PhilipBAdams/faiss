@@ -18,3 +18,6 @@ target_link_libraries(demo_sift1M PRIVATE faiss)
 
 add_executable(demo_weighted_kmeans EXCLUDE_FROM_ALL demo_weighted_kmeans.cpp)
 target_link_libraries(demo_weighted_kmeans PRIVATE faiss)
+
+add_executable(hnsw_test EXCLUDE_FROM_ALL sift_1000M_hnsw.cpp)
+target_link_libraries(hnsw_test PRIVATE faiss)
